@@ -1,0 +1,167 @@
+---
+version: "2.1"
+
+networks:
+  base:
+
+services:
+  #  nextcloud:
+  #image: linuxserver/nextcloud
+  #container_name: nextcloud
+  #environment:
+  #- PUID=1000
+  #- PGID=100
+  #- TZ=Europe/London
+  #volumes:
+  #- /srv/dev-disk-by-label-shared/appdata/nextcloud/config:/config
+  #- /srv/dev-disk-by-label-shared/appdata/nextcloud/data:/data
+  #depends_on:
+  #- mariadb
+  #networks:
+  #- base
+
+  mariadb:
+    image: linuxserver/mariadb
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=100
+      - MYSQL_ROOT_PASSWORD=aba0954
+      - TZ=Europe/London
+      - MYSQL_DATABASE=nextcloud_db
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=aba0954
+    volumes:
+      - databases:/srv/dev-disk-by-label-shared/appdata/mariadb
+    restart: unless-stopped
+    networks:
+      - base
+
+  swag:
+    image: linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=100
+      - TZ=Europe/London
+      - URL=mbhub.duckdns.org
+      - SUBDOMAINS=wildcard
+      - VALIDATION=duckdns
+      - DUCKDNSTOKEN=2ac8057b-8d3a-4363-9afc-d5bb25ad6502
+      - EMAIL=danny@stuntrocket.co
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/letsencrypt:/config
+    ports:
+      - 443:443
+      - 82:80
+    networks:
+      - base
+    restart: unless-stopped
+
+  heimdall:
+    image: linuxserver/heimdall
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/heimdall:/config
+    ports:
+      - 446:443
+    networks:
+      - base
+    restart: unless-stopped
+
+  code-server:
+    image: linuxserver/code-server
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=100
+      - TZ=Europe/London
+      - PASSWORD=csaba0954 #optional
+      - SUDO_PASSWORD=aba0954 #optional
+      - PROXY_DOMAIN=mbhub.duckdns.org #optional
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/codeserver:/config
+    ports:
+      - 8443:8443
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    ports:
+      - "88:88"
+      - "447:447"
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/letsencrypt:/config
+      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+      - /srv/dev-disk-by-label-shared/appdata/laravel/config/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - base
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - base
+
+  composer:
+    image: composer:latest
+    container_name: composer
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    networks:
+      - base
+
+  npm:
+    image: node:13.7
+    container_name: npm
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ["npm"]
+
+  artisan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: artisan
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ["php", "/var/www/html/artisan"]
+    networks:
+      - base
+
+  ssms-sockets:
+    build:
+      context: .
+    container_name: ssms-sockets
+    volumes:
+      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    working_dir: /var/www/html
+    ports:
+      - 6001:6001
+    networks:
+      base:
+        aliases:
+          - ssms-sockets
+
+volumes:
+  databases:
