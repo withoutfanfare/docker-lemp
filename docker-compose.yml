@@ -69,18 +69,12 @@ services:
       - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
     ports:
       - "9000:9000"
-      - 6003:6003
-    networks:
-      - base
-
-  composer:
+      - "6003:6001"
     image: composer:latest
     container_name: composer
     volumes:
       - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
     working_dir: /var/www/html
-    depends_on:
-      - php
     networks:
       - base
 
@@ -106,19 +100,19 @@ services:
     networks:
       - base
 
-  websockets:
-    build:
-      context: .
-    container_name: websockets
-    volumes:
-      - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
-    working_dir: /var/www/html
-    depends_on:
-      - artisan
-    ports:
-      - 6001:6001
-    networks:
-      - base
+  # websockets:
+  #   build:
+  #     context: .
+  #   container_name: websockets
+  #   volumes:
+  #     - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+  #     - /srv/dev-disk-by-label-shared/appdata/laravel/config/supervisord.d:/etc/supervisord.d
+  #   working_dir: /var/www/html
+  #   ports:
+  #     - "443:6001"
+  #   entrypoint: ["php", "/var/www/html/artisan", "websockets:serve"]
+  #   networks:
+  #     - base
 
 volumes:
   databases:
