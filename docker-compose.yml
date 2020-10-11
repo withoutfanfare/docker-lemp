@@ -20,6 +20,7 @@ services:
       - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
     depends_on:
       - php
+    restart: unless-stopped
     networks:
       - laravel
 
@@ -74,6 +75,7 @@ services:
       - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html:delegated
     ports:
       - "9000:9000"
+    restart: unless-stopped
     networks:
       - laravel
 
@@ -117,6 +119,7 @@ services:
       - php
     volumes:
       - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    restart: unless-stopped
     environment:
       APP_ENV: local
       CONTAINER_ROLE: scheduler
@@ -128,6 +131,7 @@ services:
       - php
     volumes:
       - /srv/dev-disk-by-label-shared/appdata/laravel/src:/var/www/html
+    restart: unless-stopped
     environment:
       APP_ENV: local
       CONTAINER_ROLE: queue
