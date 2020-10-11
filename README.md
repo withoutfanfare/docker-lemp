@@ -1,6 +1,10 @@
-# docker-compose-laravel
-A pretty simplified docker-compose workflow that sets up a LEMP network of containers for local Laravel development. You can view the full article that inspired this repo [here](https://medium.com/@aschmelyun).
+https://medium.com/@aschmelyun/the-beauty-of-docker-for-local-laravel-development-b5eb6caf0946
+https://github.com/aschmelyun/docker-compose-laravel
+https://dev.to/aschmelyun/the-beauty-of-docker-for-local-laravel-development-13c0
 
+# docker-compose-laravel
+
+A pretty simplified docker-compose workflow that sets up a LEMP network of containers for local Laravel development. You can view the full article that inspired this repo [here](https://medium.com/@aschmelyun).
 
 ## Usage
 
